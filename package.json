@@ -1,0 +1,13 @@
+{
+  "name": "markdown",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npx tsc -p .",
+    "test": "yarn build && node dist/test/entry.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^2.9.2"
+  }
+}
