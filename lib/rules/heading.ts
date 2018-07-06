@@ -1,31 +1,29 @@
-import { HeadingToken, InlineToken, TokenType } from "../core/token";
+import { HeadingToken, InlineToken, TokenType } from "../tokens";
 import { Core } from "../core";
-import { IsSpace } from "../utils/string";
-
-interface Rule {
-  process(core: Core, startLine: number): boolean;
-};
+import { IsSpace, Code } from "../utils/string";
+import { Rule } from './rule';
 
 class Heading implements Rule {
   process(core: Core, startLine: number) {
     const content = core.src;
 
-    let pos = core.beginPosMap[startLine] + core.indentMap[startLine];
-    let max = core.endPosMap[startLine];
+    let pos = core.beginMap[startLine] + core.rawIndentMap[startLine];
+    let max = core.endMap[startLine];
 
-    if (core.offsetMap[startLine] - core.blockIndent >= 4) {
+    if (core.expandIndentMap[startLine] - core.blockIndent >= 4) {
       return false;
     }
     
     let code = content.charCodeAt(pos);
-    /// `0x23` === `#`
-    if (code !== 0x23) {
+    if (code !== Code('#')) {
       return false;
     }
 
-    let level = 1;
-    code = content.charCodeAt(pos);
-    while(code === 0x23 && level <= 6) {
+    /// `#` starting position
+    const start = pos;
+
+    let level = 0;
+    while(code === Code('#') && level <= 6) {
       level++;
       code = content.charCodeAt(++pos);
     }
@@ -48,20 +46,21 @@ class Heading implements Rule {
     const hTag = 'h' + String(level);
 
     /// heading open
-    const headingOpen = new HeadingToken(TokenType.HeadingOpen, pos, hTag);
+    const headingOpen = new HeadingToken(TokenType.HeadingOpen, start, hTag);
     headingOpen.lineMap = [startLine, core.line];
     core.push(headingOpen);
 
-    const end = pos + level;
-
     /// all remaining characters in current line are text
     const text = content.slice(pos, max).trim();
-    const Text = new InlineToken(pos, text);
+    /// `pos + 1`, because current `pos` is a space, but
+    /// line text start from next position.
+    const Text = new InlineToken(pos + 1, text);
     Text.lineMap = [startLine, core.line];
     core.push(Text); 
 
     /// heading close
-    const headingClose = new HeadingToken(TokenType.HeadingClose, end, hTag);
+    /// Treat cutted line end position as heading ending.
+    const headingClose = new HeadingToken(TokenType.HeadingClose, max, hTag);
     headingClose.lineMap = [startLine, core.line];
     core.push(headingClose);
 
@@ -70,6 +69,5 @@ class Heading implements Rule {
 };
 
 export {
-  Rule,
   Heading,
 };

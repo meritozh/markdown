@@ -1,3 +1,4 @@
-import { Rule, Heading } from './heading';
+import { Rule } from './rule';
+import { Heading } from './heading';
 
 export { Rule, Heading };
