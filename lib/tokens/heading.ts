@@ -1,4 +1,4 @@
-import { Token, TokenType } from './token';
+import { Token, TokenType } from "./token";
 
 class HeadingToken extends Token {
   level: number = 0;

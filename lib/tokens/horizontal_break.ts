@@ -1,4 +1,4 @@
-import { Token, TokenType } from './token';
+import { Token, TokenType } from "./token";
 
 class HorizontalBreakToken extends Token {
   tag: string;
@@ -7,6 +7,6 @@ class HorizontalBreakToken extends Token {
     super(type, pos);
     this.tag = tag;
   }
-};
+}
 
 export { HorizontalBreakToken };

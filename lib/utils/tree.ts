@@ -71,14 +71,14 @@ enum NodeType {
 }
 
 class Node {
-  type: NodeType;
+  nodeType: NodeType;
   parent?: Node = undefined;
   children = Array<Node>();
   /// unique id
   index?: number;
 
   constructor(type = NodeType.Normal) {
-    this.type = type;
+    this.nodeType = type;
   }
 
   get isLeaf() {
@@ -86,7 +86,7 @@ class Node {
   }
 
   get isRoot() {
-    return this.type === NodeType.Root;
+    return this.nodeType === NodeType.Root;
   }
 
   addChild(node: Node) {

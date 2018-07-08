@@ -1,4 +1,4 @@
-import { Token, TokenType } from './token';
+import { Token, TokenType } from "./token";
 
 class CodeBlockToken extends Token {
   content: string;
@@ -7,6 +7,6 @@ class CodeBlockToken extends Token {
     super(TokenType.CodeBlock, pos);
     this.content = content;
   }
-};
+}
 
 export { CodeBlockToken };

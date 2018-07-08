@@ -1,4 +1,4 @@
-import { Token, TokenType } from './token';
+import { Token, TokenType } from "./token";
 
 /// InlineToken need be tokenized later
 class InlineToken extends Token {
@@ -10,6 +10,6 @@ class InlineToken extends Token {
     this.content = content;
     this.inline = true;
   }
-};
+}
 
 export { InlineToken };

@@ -1,4 +1,4 @@
-import { Token, TokenType } from './token';
+import { Token, TokenType } from "./token";
 
 class FenceToken extends Token {
   tag: string;
@@ -11,8 +11,6 @@ class FenceToken extends Token {
     this.tag = tag;
     this.content = content;
   }
-};
+}
 
-export {
-  FenceToken
-};
+export { FenceToken };

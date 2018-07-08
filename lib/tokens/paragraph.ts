@@ -1,4 +1,4 @@
-import { Token, TokenType } from './token';
+import { Token, TokenType } from "./token";
 
 class ParagraphToken extends Token {
   tag: string;
@@ -8,6 +8,6 @@ class ParagraphToken extends Token {
     this.tag = tag;
     this.inline = false;
   }
-};
+}
 
 export { ParagraphToken };
