@@ -1,32 +1,17 @@
-import {Token} from '../tokens/token';
-import {IsIndent, IsNewLine, IsNonWhitespace, IsTab} from '../utils/string';
+import { Token } from "../tokens/token";
+import { IsIndent, IsNewLine, IsNonWhitespace, IsTab } from "../utils";
 
-/// Current `Core` is too heavy!
 /// Need move some logics to state machine, to keep `Core` only
 /// manage parsing state.
-class Core {
+class StateManager {
   /**
-   * Current processing block is tight or not.
-   *
-   * i.e.
-   *
-   * ```
-   * <empty line>
-   * conten here
-   * <empty line>
-   * ```
-   *
-   * is not tight.
+   * The processing markdown file content.
    */
-  tight: boolean = false;
-  /**
-   * The processing markdown file.
-   */
-  src: string = '';
+  src: string = "";
   /**
    * Current processing line number.
    */
-  line: number = 0;
+  currentLine: number = 0;
   /**
    * Max line number.
    */
@@ -63,13 +48,9 @@ class Core {
   recordTabExpandGuideMap: number[] = [];
 
   /**
-   * Used for nested calls, such as *blockquotes* & *lists*.
+   * Used for nested calls, such as blockquote, list, table, etc.
    */
   blockIndent = 0;
-  /**
-   * Indent level.
-   */
-  level = 0;
 
   tokens: Token[] = [];
 
@@ -91,18 +72,20 @@ class Core {
     let handledIndent = false;
     let length = this.src.length;
 
-    for (;pos < length; ++pos) {
+    for (; pos < length; ++pos) {
       let code = this.src.charCodeAt(pos);
 
       if (!handledIndent) {
         if (IsIndent(code)) {
           rawIndent++;
-          if (IsTab(code)) {  /// tab expand to 4 spaces
+          if (IsTab(code)) {
+            /// tab expand to 4 spaces
             /// for example `<space><tab>`, it should be expand to:
             /// 5? not beautiful.
             /// 4. beautiful, of course commonmark spec defined this.
-            expandIndent += 4 - expandIndent % 4;
-          } else {  /// space
+            expandIndent += 4 - (expandIndent % 4);
+          } else {
+            /// space
             expandIndent++;
           }
           continue;
@@ -214,7 +197,7 @@ class Core {
 
   /**
    * Get content of one line.
-   * 
+   *
    * @param line line number
    * @param indent indent, start from beginMap[line]
    */
@@ -226,14 +209,14 @@ class Core {
 
   /**
    * Get content as html tag content, may need some trick about indent
-   * 
+   *
    * @param start start line number
    * @param end end line number
    * @param indent used in code block, trim indent
    */
   getLines(start: number, end: number, indent?: number) {
     if (start >= end) {
-      return '';
+      return "";
     }
 
     if (indent) {
@@ -273,7 +256,7 @@ class Core {
           if (IsIndent(code)) {
             if (IsTab(code)) {
               lineIndent +=
-                  4 - (lineIndent + this.recordTabExpandGuideMap[line]) % 4;
+                4 - ((lineIndent + this.recordTabExpandGuideMap[line]) % 4);
             } else {
               ++lineIndent;
             }
@@ -287,17 +270,20 @@ class Core {
 
           ++first;
         }
-        
-        if (lineIndent > indent) { /// Dead code??? lineIndent++ won't skip ===
+
+        if (lineIndent > indent) {
+          /// Dead code??? lineIndent++ won't skip ===
           /// Partially expanding tabs in code blocks, e.g '\t\tfoobar'
           /// with indent = 2 will becomes '  \tfoobar'.
-          queue[i] = new Array(lineIndent - indent + 1).join(' ') + this.src.slice(first, last);
+          queue[i] =
+            new Array(lineIndent - indent + 1).join(" ") +
+            this.src.slice(first, last);
         } else {
           queue[i] = this.src.slice(first, last);
         }
       }
 
-      return queue.join('');
+      return queue.join("");
     }
 
     return this.src.slice(this.beginMap[start], this.endMap[end]);
@@ -306,6 +292,6 @@ class Core {
   push(token: Token) {
     this.tokens.push(token);
   }
-};
+}
 
-export {Core};
+export { StateManager };

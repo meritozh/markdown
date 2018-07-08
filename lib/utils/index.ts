@@ -1,3 +1,10 @@
-import { Code, IsNewLine, IsNonWhitespace, IsSpace } from "./string";
+import {
+  Code,
+  IsNewLine,
+  IsNonWhitespace,
+  IsSpace,
+  IsIndent,
+  IsTab
+} from "./string";
 
-export { Code, IsNewLine, IsNonWhitespace, IsSpace };
+export { Code, IsNewLine, IsNonWhitespace, IsSpace, IsIndent, IsTab };
