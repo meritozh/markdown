@@ -1,83 +1,95 @@
 class Tree {
-  root: Node;
-  current: Node;
+  private root: Node;
+  private current: Node;
+  /// Store the number of nodes.
+  private length: number;
   
   constructor() {
     this.root = new Node(NodeType.Root);
     this.current = this.root;
+    this.length = 1;
   }
 
-  /// Breath first searching.
-  next() {
-    const node = this.current.next();
-    if (!node) {
-      return this.current = this.current.children[this.current.childIndex];
+  isEmpty() {
+    return this.length === 0;
+  }
+
+  /**
+   * Breadth-first visit from root node.
+   */
+  visit(handler: (node: Node) => void) {
+    this.visitFrom(this.root, handler);
+  }
+
+  /**
+   * Update current node.
+   */
+  update(node: Node) {
+    this.current = node;
+  }
+
+  /**
+   * Breadth-first visit from node.
+   */
+  visitFrom(node: Node, handler:(node: Node) => void) {
+    let queue = Array<Node>();
+    queue.push(node);
+
+    while (queue.length !== 0) {
+      const visitNode = queue.shift()!;
+      queue = queue.concat(visitNode.children);
+      handler(visitNode);
     }
-    return node;
   }
 
-  add(node: Node) {
-    this.current.add(node);
-  }
-
-  validate() {
-    this.validateNode(this.root);
-  }
-
-  private validateNode(node: Node) {
-    node.children.forEach(child => {
-      switch (child.type) {
-        case NodeType.Parent:
-          if (child.children.length === 0) {
-            throw Error('Parent type node but have no child');
-          }
-          child.children.forEach(child => {
-            this.validateNode(child);
-          });
-          break;
-        case NodeType.Leaf:
-          if (child.children.length !== 0) {
-            throw Error('Leaf type node but have child');
-          }
-          break;
-      }
-    });
-    
-    /// Root node will be validated finally.
-    if (node.isRoot) {
-      console.log('Passing validation.');
+  /**
+   * Add node as child of current node.
+   */
+  addChild(node: Node, update = true) {
+    this.current.addChild(node);
+    if (update) {
+      this.current = node;
     }
+    this.length++;
+  }
+
+  /**
+   * Add node as sibling of current node.
+   */
+  addSibling(node: Node, update = true) {
+    this.current.addChild(node);
+    if (update) {
+      this.current = node;
+    }
+    this.length++;
   }
 }
 
 enum NodeType {
   Root,
-  Parent,
-  Leaf,
+  Normal,
 }
 
 class Node {
   type: NodeType;
   parent?: Node = undefined;
   children = Array<Node>();
-  childIndex = 0;
+  /// unique id
+  index?: number;
 
-  constructor(type: NodeType) {
+  constructor(type = NodeType.Normal) {
     this.type = type;
+  }
+
+  get isLeaf() {
+    return this.children.length === 0;
   }
 
   get isRoot() {
     return this.type === NodeType.Root;
   }
 
-  next() {
-    if (this.childIndex > this.children.length - 1) {
-      return undefined;
-    }
-    return this.children[this.childIndex++];
-  }
-
-  add(node: Node) {
+  addChild(node: Node) {
     node.parent = this;
     this.children.push(node);
   }

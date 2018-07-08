@@ -1,9 +1,9 @@
 import { Rule } from "./rule";
-import { Core } from "../core";
+import { StateManager } from "../core";
 import { ParagraphToken, TokenType, InlineToken } from "../tokens";
 
 class Paragraph implements Rule {
-  process(core: Core, startLine: number) {
+  process(core: StateManager, startLine: number) {
     let nextLine = startLine + 1;
     let endLine = core.maxLine;
     
@@ -17,19 +17,19 @@ class Paragraph implements Rule {
       /// but now, only empty line will separate paragraph.
     }
 
-    core.line = nextLine;
+    core.currentLine = nextLine;
 
     const paragraphOpen = new ParagraphToken(TokenType.ParagraphOpen, core.beginMap[startLine], 'p');
-    paragraphOpen.lineMap = [startLine, core.line];
+    paragraphOpen.lineMap = [startLine, core.currentLine];
     core.push(paragraphOpen);
 
     const content = core.getLines(startLine, nextLine);
     const inlineToken = new InlineToken(core.beginMap[startLine], content);
-    inlineToken.lineMap = [startLine, core.line];
+    inlineToken.lineMap = [startLine, core.currentLine];
     core.push(inlineToken);
 
     const paragraphClose = new ParagraphToken(TokenType.ParagraphClose, core.beginMap[nextLine], 'p');
-    paragraphClose.lineMap = [startLine, core.line];
+    paragraphClose.lineMap = [startLine, core.currentLine];
     core.push(paragraphClose);
 
     return true;

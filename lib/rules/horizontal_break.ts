@@ -1,4 +1,4 @@
-import { Core } from "../core";
+import { StateManager } from "../core";
 import { TokenType } from "../tokens";
 import { HorizontalBreakToken } from "../tokens/horizontal_break";
 import { Code, IsNewLine, IsNonWhitespace } from "../utils";
@@ -6,7 +6,7 @@ import { Code, IsNewLine, IsNonWhitespace } from "../utils";
 import { Rule } from "./rule";
 
 class HorizonalBreak implements Rule {
-  process(core: Core, startLine: number) {
+  process(core: StateManager, startLine: number) {
     /// If it's indented more than 3 spaces, it should be a code block
     if (core.expandIndentMap[startLine] - core.blockIndent >= 4) {
       return false;
@@ -27,14 +27,14 @@ class HorizonalBreak implements Rule {
       return false;
     }
 
-    core.line = startLine + 1;
+    core.currentLine = startLine + 1;
 
     const horizontalBreakToken = new HorizontalBreakToken(
       TokenType.HorizontalBreak,
       pos,
       "hr"
     );
-    horizontalBreakToken.lineMap = [startLine, core.line];
+    horizontalBreakToken.lineMap = [startLine, core.currentLine];
     core.push(horizontalBreakToken);
 
     return true;

@@ -1,10 +1,10 @@
 import { HeadingToken, InlineToken, TokenType } from "../tokens";
-import { Core } from "../core";
+import { StateManager } from "../core";
 import { IsSpace, Code } from "../utils/string";
 import { Rule } from './rule';
 
 class Heading implements Rule {
-  process(core: Core, startLine: number) {
+  process(core: StateManager, startLine: number) {
     const content = core.src;
 
     let pos = core.beginMap[startLine] + core.rawIndentMap[startLine];
@@ -41,13 +41,13 @@ class Heading implements Rule {
       max = tmp;
     }
 
-    core.line = startLine + 1;
+    core.currentLine = startLine + 1;
 
     const hTag = 'h' + String(level);
 
     /// heading open
     const headingOpen = new HeadingToken(TokenType.HeadingOpen, start, hTag);
-    headingOpen.lineMap = [startLine, core.line];
+    headingOpen.lineMap = [startLine, core.currentLine];
     core.push(headingOpen);
 
     /// all remaining characters in current line are text
@@ -55,13 +55,13 @@ class Heading implements Rule {
     /// `pos + 1`, because current `pos` is a space, but
     /// line text start from next position.
     const Text = new InlineToken(pos + 1, text);
-    Text.lineMap = [startLine, core.line];
+    Text.lineMap = [startLine, core.currentLine];
     core.push(Text); 
 
     /// heading close
     /// Treat cutted line end position as heading ending.
     const headingClose = new HeadingToken(TokenType.HeadingClose, max, hTag);
-    headingClose.lineMap = [startLine, core.line];
+    headingClose.lineMap = [startLine, core.currentLine];
     core.push(headingClose);
 
     return true;

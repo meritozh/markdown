@@ -1,4 +1,4 @@
-import {Core} from '../core';
+import {StateManager} from '../core';
 import {TokenType} from '../tokens';
 import {FenceToken} from '../tokens/fence';
 
@@ -7,7 +7,7 @@ import {Rule} from './rule';
 
 /// ```lang
 class Fence implements Rule {
-  process(core: Core, startLine: number) {
+  process(core: StateManager, startLine: number) {
     if (core.expandIndentMap[startLine] - core.blockIndent >= 4) {
       return false;
     }
@@ -93,7 +93,7 @@ class Fence implements Rule {
     /// Need trim all `\b`s.
     length = core.expandIndentMap[startLine];
 
-    core.line = nextLine + (haveEndMarker ? 1 : 0);
+    core.currentLine = nextLine + (haveEndMarker ? 1 : 0);
 
     /// `startLine + 1`, because we do not need ```<lang> here.
     /// `nextLine - 1`, because we do not need ```.
@@ -101,7 +101,7 @@ class Fence implements Rule {
     const fenceToken =
         new FenceToken(TokenType.CodeFence, firstPos, 'code', content);
     fenceToken.lang = lang;
-    fenceToken.lineMap = [startLine, core.line];
+    fenceToken.lineMap = [startLine, core.currentLine];
     core.push(fenceToken);
 
     return true;

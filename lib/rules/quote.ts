@@ -1,5 +1,5 @@
 import { Rule } from "./rule";
-import { Core } from "../core";
+import { StateManager } from "../core";
 
 import { Code, IsSpace, IsNewLine } from "../utils";
 import { QuoteToken } from "../tokens/quote";
@@ -17,7 +17,7 @@ class LevelContentMap {
 
 /// All space is not optional.
 class Quote implements Rule {
-  process(core: Core, startLine: number) {
+  process(core: StateManager, startLine: number) {
     if (core.expandIndentMap[startLine] - core.blockIndent >= 4) {
       return false;
     }
@@ -64,7 +64,7 @@ class Quote implements Rule {
       ++nextLine;
     }
 
-    core.line = nextLine + 1;
+    core.currentLine = nextLine + 1;
 
     for (const map of lineContent) {
       let quoteToken = new QuoteToken(

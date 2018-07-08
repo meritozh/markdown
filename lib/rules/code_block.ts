@@ -1,10 +1,10 @@
-import {Core} from '../core';
+import {StateManager} from '../core';
 import {CodeBlockToken} from '../tokens/code_block';
 
 import {Rule} from './rule';
 
 class CodeBlock implements Rule {
-  process(core: Core, startLine: number) {
+  process(core: StateManager, startLine: number) {
     if (core.expandIndentMap[startLine] - core.blockIndent < 4) {
       return false;
     }
@@ -28,7 +28,7 @@ class CodeBlock implements Rule {
       break;
     }
 
-    core.line = nextLine;
+    core.currentLine = nextLine;
 
     const content = core.getLines(startLine, lastLine, core.blockIndent + 4);
     const codeBlockToken =
