@@ -17,18 +17,27 @@ enum TokenType {
   Inline = "inline"
 }
 
+type T = [number, number];
+
 class Token extends Node {
   tokenType: TokenType;
-  /// Position in whole string, not token's content.
-  pos: number;
-  inline: boolean = false;
-  /// Line map, if same, means one line
-  lineMap: [number, number] = [0, 0];
+  /**
+   * A position map of begin of current token to source file.
+   */
+  row: number;
+  column: number;
+  /**
+   * Line map, if same number means one line.
+   * Ditermine how big this token is.
+   */
+  lineMap: T;
 
-  constructor(type: TokenType, pos: number) {
+  constructor(type: TokenType, row: number, column: number, lineMap: T) {
     super();
     this.tokenType = type;
-    this.pos = pos;
+    this.row = row;
+    this.column = column;
+    this.lineMap = lineMap;
   }
 }
 
