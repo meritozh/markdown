@@ -1,14 +1,14 @@
-import { Token, TokenType } from "./token";
+import { Token, TokenType, T } from "./token";
 
 class FenceToken extends Token {
-  tag: string;
+  tag: string = 'code';
   content: string;
   /// Language name, used for highlight.
-  lang?: string;
+  lang: string;
 
-  constructor(type: TokenType, pos: number, tag: string, content: string) {
-    super(type, pos);
-    this.tag = tag;
+  constructor(start: T, lineMap: T, lang: string, content: string) {
+    super(TokenType.CodeFence, start, lineMap);
+    this.lang = lang;
     this.content = content;
   }
 }

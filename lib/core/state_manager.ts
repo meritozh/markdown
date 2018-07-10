@@ -1,5 +1,5 @@
 import { Token } from "../tokens/token";
-import { IsIndent, IsNewLine, IsNonWhitespace, IsTab } from "../utils";
+import { IsIndent, IsNewLine, IsTab, Tree, IsWhitespace } from "../utils";
 
 /// Need move some logics to state machine, to keep `Core` only
 /// manage parsing state.
@@ -9,58 +9,71 @@ class StateManager {
    */
   src: string = "";
   /**
-   * Current processing line number.
+   * Current processing row.
+   *
+   * Warning: Start from 1.
    */
-  currentLine: number = 0;
+  currentRow: number = 1;
   /**
-   * Max line number.
+   * Max row number.
    */
-  maxLine: number = 0;
+  maxRow: number = 0;
 
-  /// They are map, because key is `this.line`, value is `this.src.index`.
+  /// They are map, because key is `this.currentRow`, value is `this.src.index`.
 
   /**
    * Line begin position for fast jump, is one `this.src.index`.
+   *
+   * Warning: Start from 1.
    */
-  beginMap: number[] = [];
+  beginMap: number[] = [0];
   /**
    * Line end position for fast jump, is one `this.src.index`.
+   *
+   * Warning: Start from 1.
    */
-  endMap: number[] = [];
+  endMap: number[] = [0];
   /**
    * Offset of first non-whitespace character (tab not expanded),
    * Used when handle raw file content or unicode.
+   *
+   * Warning: Start from 1.
    */
-  rawIndentMap: number[] = [];
+  rawIndentMap: number[] = [0];
   /**
    * Offset of first non-whitespace character (tab expand),
    * Used when handle markdown format.
+   *
+   * Warning: Start from 1.
    */
-  expandIndentMap: number[] = [];
-
+  expandIndentMap: number[] = [0];
   /**
    * In some case, like indent code block, number of tab expand to space is
    * dynamic. For example, if this map show 21, first tab should be expanded
    * to 4 - 21 % 4 = 3. To make final indent more beautiful.
    *
-   * This value will be set outside.
+   * This value will be set from outside.
+   *
+   * Warning: Start from 1.
    */
-  recordTabExpandGuideMap: number[] = [];
+  recordTabExpandGuideMap: number[] = [0];
 
   /**
-   * Used for nested calls, such as blockquote, list, table, etc.
+   * Note current indent.
+   * Used for nested blocks, such as blockquote, list, table, etc.
+   *
+   * FIXME: should not be here.
    */
   blockIndent = 0;
 
-  tokens: Token[] = [];
+  tokens = new Tree();
 
   /// Handle file as one big string.
   /// Will calculate [line -> pos] map, number of line, etc.
-  process(src: string) {
+  initialize(src: string) {
     this.src = src;
 
     /// Initial position of current processing line.
-    /// In next loop, start will be updated.
     let start = 0;
     /// Current processing position
     let pos = 0;
@@ -80,9 +93,9 @@ class StateManager {
           rawIndent++;
           if (IsTab(code)) {
             /// tab expand to 4 spaces
-            /// for example `<space><tab>`, it should be expand to:
+            /// for example `<space><tab>`, tab should be expand to:
             /// 5? not beautiful.
-            /// 4. beautiful, of course commonmark spec defined this.
+            /// 4. beautiful.
             expandIndent += 4 - (expandIndent % 4);
           } else {
             /// space
@@ -95,18 +108,17 @@ class StateManager {
       }
 
       if (IsNewLine(code) || pos === length - 1) {
+        /// Maybe last line is a empty line, just skip it, no more loop.
         if (!IsNewLine(code)) {
           pos++;
         }
 
-        /// Store
         this.beginMap.push(start);
         this.endMap.push(pos);
         this.rawIndentMap.push(rawIndent);
         this.expandIndentMap.push(expandIndent);
         this.recordTabExpandGuideMap.push(0);
 
-        /// Initialize
         handledIndent = false;
         rawIndent = 0;
         expandIndent = 0;
@@ -114,19 +126,38 @@ class StateManager {
       }
     }
 
-    /// Push fake entry to simplify cache bounds checks.
-    this.beginMap.push(src.length);
-    this.endMap.push(src.length);
-    this.rawIndentMap.push(0);
-    this.expandIndentMap.push(0);
-    this.recordTabExpandGuideMap.push(0);
-
-    this.maxLine = this.beginMap.length;
+    this.maxRow = this.beginMap.length - 1;
   }
 
-  skipEmptyLines(from: number) {
-    for (let max = this.maxLine; from < max; ++from) {
-      if (this.beginMap[from] + this.rawIndentMap[from] < this.endMap[from]) {
+  codeFor(pos: number) {
+    return this.src.charCodeAt(pos);
+  }
+
+  getPos(location: [number, number]) {
+    const row = location["0"];
+    const column = location["1"];
+    return this.beginMap[row] + column;
+  }
+
+  getRowAndColumn(pos: number): [number, number] {
+    let column = 0;
+    let row = 1;
+    for (; row < this.beginMap.length; ++row) {
+      if (this.beginMap[row] < pos) {
+        continue;
+      } else if (this.beginMap[row] === pos) {
+        break;
+      } else {
+        column = pos - this.beginMap[row];
+        break;
+      }
+    }
+    return [row, column];
+  }
+
+  skipEmptyRows(from: number) {
+    for (let max = this.maxRow; from < max; ++from) {
+      if (!this.isEmpty(from)) {
         break;
       }
     }
@@ -134,10 +165,8 @@ class StateManager {
   }
 
   skipWhitespaces(pos: number) {
-    let code;
     for (let max = this.src.length; pos < max; ++pos) {
-      code = this.src.charCodeAt(pos);
-      if (IsNonWhitespace(code)) {
+      if (!IsWhitespace(this.codeFor(pos))) {
         break;
       }
     }
@@ -150,7 +179,7 @@ class StateManager {
     }
 
     while (pos > min) {
-      if (IsNonWhitespace(this.src.charCodeAt(pos))) {
+      if (!IsWhitespace(this.codeFor(pos))) {
         /// Current pos is not whitespace, so `end` index should be `pos + 1`.
         return pos + 1;
       }
@@ -166,7 +195,7 @@ class StateManager {
     }
 
     while (pos < max) {
-      if (this.src.charCodeAt(pos) !== code) {
+      if (this.codeFor(pos) !== code) {
         break;
       }
       ++pos;
@@ -181,7 +210,7 @@ class StateManager {
     }
 
     while (pos > min) {
-      if (this.src.charCodeAt(pos) !== code) {
+      if (this.codeFor(pos) !== code) {
         break;
       }
       --pos;
@@ -191,48 +220,47 @@ class StateManager {
   }
 
   /// FIXME: need handle block indention.
-  isEmpty(line: number) {
-    return this.beginMap[line] + this.rawIndentMap[line] >= this.endMap[line];
+  isEmpty(row: number) {
+    return this.beginMap[row] + this.rawIndentMap[row] >= this.endMap[row];
   }
 
   /**
-   * Get content of one line.
+   * Get content of one row.
    *
-   * @param line line number
+   * @param row row number
    * @param indent indent, start from beginMap[line]
    */
-  getLine(line: number, indent?: number) {
-    let start = this.beginMap[line] + (indent || 0);
-    let end = this.endMap[line];
+  getRow(row: number, indent?: number) {
+    let start = this.beginMap[row] + (indent || 0);
+    let end = this.endMap[row];
     return this.src.slice(start, end);
   }
 
   /**
    * Get content as html tag content, may need some trick about indent
    *
-   * @param start start line number
-   * @param end end line number
+   * @param start start row number
+   * @param end end row number
    * @param indent used in code block, trim indent
    */
-  getLines(start: number, end: number, indent?: number) {
+  getRows(start: number, end: number, indent?: number) {
     if (start >= end) {
       return "";
     }
 
     if (indent) {
-      let line = start;
-      /// Current processing line begin position
+      /// Current processing row begin position
       let first = 0;
-      /// Current processing line end position
+      /// Current processing row end position
       let last = 0;
       let lineIndent = 0;
       let lineStart = 0;
 
       const queue = new Array<string>(end - start);
 
-      for (let i = 0; line < end; ++line, ++i) {
+      for (let i = 0; start < end; ++start, ++i) {
         lineIndent = 0;
-        lineStart = this.beginMap[line];
+        lineStart = this.beginMap[start];
         first = lineStart;
 
         /// \tasfdgf
@@ -244,23 +272,23 @@ class StateManager {
         ///
         /// So line end position needn't increase 1 to make
         /// slice cotain `\n`, except last line.
-        if (line + 1 < end) {
-          last = this.endMap[line] + 1;
+        if (start + 1 < end) {
+          last = this.endMap[start] + 1;
         } else {
-          last = this.endMap[line];
+          last = this.endMap[start];
         }
 
         while (first < last && lineIndent < indent) {
-          let code = this.src.charCodeAt(first);
+          let code = this.codeFor(first);
 
           if (IsIndent(code)) {
             if (IsTab(code)) {
               lineIndent +=
-                4 - ((lineIndent + this.recordTabExpandGuideMap[line]) % 4);
+                4 - ((lineIndent + this.recordTabExpandGuideMap[start]) % 4);
             } else {
               ++lineIndent;
             }
-          } else if (first - lineStart < this.rawIndentMap[line]) {
+          } else if (first - lineStart < this.rawIndentMap[start]) {
             /// In code block or other similar case, tab in content may expand
             /// to one space.
             ++lineIndent;
@@ -271,16 +299,16 @@ class StateManager {
           ++first;
         }
 
-        if (lineIndent > indent) {
-          /// Dead code??? lineIndent++ won't skip ===
-          /// Partially expanding tabs in code blocks, e.g '\t\tfoobar'
-          /// with indent = 2 will becomes '  \tfoobar'.
-          queue[i] =
-            new Array(lineIndent - indent + 1).join(" ") +
-            this.src.slice(first, last);
-        } else {
-          queue[i] = this.src.slice(first, last);
-        }
+        // if (lineIndent > indent) {
+        /// Dead code??? lineIndent++ won't skip ===
+        /// Partially expanding tabs in code blocks, e.g '\t\tfoobar'
+        /// with indent = 2 will becomes '  \tfoobar'.
+        //   queue[i] =
+        //   new Array(lineIndent - indent + 1).join(" ") +
+        //   this.src.slice(first, last);
+        // } else {
+        queue[i] = this.src.slice(first, last);
+        // }
       }
 
       return queue.join("");
@@ -289,8 +317,12 @@ class StateManager {
     return this.src.slice(this.beginMap[start], this.endMap[end]);
   }
 
-  push(token: Token) {
-    this.tokens.push(token);
+  addChild(token: Token, to?: Token) {
+    if (to) {
+      this.tokens.addChild(token, to);
+    } else {
+      this.tokens.addChild(token, this.tokens.current)
+    }
   }
 }
 

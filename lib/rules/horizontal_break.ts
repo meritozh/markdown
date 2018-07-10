@@ -1,41 +1,43 @@
 import { StateManager } from "../core";
-import { TokenType } from "../tokens";
-import { HorizontalBreakToken } from "../tokens/horizontal_break";
-import { Code, IsNewLine, IsNonWhitespace } from "../utils";
+import { HorizontalBreakToken } from "../tokens";
+import { Code, IsWhitespace } from "../utils";
 
 import { Rule } from "./rule";
 
 class HorizonalBreak implements Rule {
-  process(core: StateManager, startLine: number) {
+  process(state: StateManager) {
+    const startRow = state.currentRow;
     /// If it's indented more than 3 spaces, it should be a code block
-    if (core.expandIndentMap[startLine] - core.blockIndent >= 4) {
+    if (state.expandIndentMap[startRow] - state.blockIndent >= 4) {
       return false;
     }
 
-    let pos = core.beginMap[startLine];
-    pos = core.skipWhitespaces(pos);
+    /// This is important
+    let pos = state.beginMap[startRow];
+    pos = state.skipWhitespaces(pos);
     let level = 0;
-    let code = core.src.charCodeAt(pos);
+    let code = state.src.charCodeAt(pos);
+
+    let location: [number, number] | undefined = undefined;
 
     while (code === Code("-")) {
       ++level;
-      code = core.src.charCodeAt(++pos);
+      if (!location) {
+        location = [startRow, pos];
+      }
+      code = state.src.charCodeAt(++pos);
     }
 
-    /// At least three -, and after all -, must \n or whitespace.
-    if (level < 3 || IsNonWhitespace(code) || !IsNewLine(code)) {
+    /// At least three -, and after all -, must whitespace.
+    if (level < 3 || !IsWhitespace(code)) {
       return false;
     }
 
-    core.currentLine = startLine + 1;
+    state.currentRow = startRow + 1;
 
-    const horizontalBreakToken = new HorizontalBreakToken(
-      TokenType.HorizontalBreak,
-      pos,
-      "hr"
+    state.addChild(
+      new HorizontalBreakToken(location!, [startRow, state.currentRow])
     );
-    horizontalBreakToken.lineMap = [startLine, core.currentLine];
-    core.push(horizontalBreakToken);
 
     return true;
   }

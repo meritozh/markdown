@@ -1,8 +1,9 @@
 class Tree {
   private root: Node;
-  private current: Node;
   /// Store the number of nodes.
   private length: number;
+
+  current: Node;
   
   constructor() {
     this.root = new Node(NodeType.Root);
@@ -45,22 +46,8 @@ class Tree {
   /**
    * Add node as child of current node.
    */
-  addChild(node: Node, update = true) {
-    this.current.addChild(node);
-    if (update) {
-      this.current = node;
-    }
-    this.length++;
-  }
-
-  /**
-   * Add node as sibling of current node.
-   */
-  addSibling(node: Node, update = true) {
-    this.current.addChild(node);
-    if (update) {
-      this.current = node;
-    }
+  addChild(node: Node, to: Node) {
+    to.addChild(node);
     this.length++;
   }
 }

@@ -1,12 +1,14 @@
-import { Token, TokenType } from "./token";
+import { Token, TokenType, T } from "./token";
 
 class HeadingToken extends Token {
   level: number = 0;
   tag: string;
+  content: string;
 
-  constructor(type: TokenType, pos: number, tag: string) {
-    super(type, pos);
+  constructor(start: T, lineMap: T, tag: string, content: string) {
+    super(TokenType.Heading, start, lineMap);
     this.tag = tag;
+    this.content = content;
   }
 }
 

@@ -1,21 +1,12 @@
 import {
   Code,
   IsNewLine,
-  IsNonWhitespace,
   IsSpace,
   IsIndent,
-  IsTab
+  IsTab,
+  IsWhitespace
 } from "./string";
 
 import { Node, Tree } from "./tree";
 
-export {
-  Node,
-  Tree,
-  Code,
-  IsNewLine,
-  IsNonWhitespace,
-  IsSpace,
-  IsIndent,
-  IsTab
-};
+export { Node, Tree, Code, IsNewLine, IsSpace, IsIndent, IsTab, IsWhitespace };

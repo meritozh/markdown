@@ -1,57 +1,56 @@
 import fs from "fs";
 
-import { Heading } from "../rules";
-import { CodeBlock } from "../rules/code_block";
-import { Paragraph } from "../rules/paragraph";
-import { Token } from "../tokens/token";
+import {
+  Heading,
+  Paragraph,
+  CodeBlock,
+  Quote,
+  HorizonalBreak,
+  Fence
+} from "../rules";
 
 import { StateManager } from ".";
-import { Fence } from "../rules/fence";
-import { HorizonalBreak } from "../rules/horizontal_break";
-import { Quote } from "../rules/quote";
 
 class Parser {
   manager = new StateManager();
   /// Order of rules initialize is important
   blockRules = [
+    new CodeBlock(), /// Must be first.
     new Quote(),
     new Fence(),
-    new CodeBlock(),
     new Heading(),
     new HorizonalBreak(),
-    new Paragraph(),
+    new Paragraph()
   ];
 
-  inlineRules = [
+  inlineRules = [];
 
-  ]
-
-  process(src: string) {
-    this.manager.process(src);
-    this.tokenize();
+  initialize(src: string) {
+    this.manager.initialize(src);
+    return this;
   }
 
-  private tokenize() {
+  tokenize() {
     const length = this.blockRules.length;
 
-    let line = this.manager.currentLine;
-    let endLine = this.manager.maxLine;
+    let row = this.manager.currentRow;
+    let endRow = this.manager.maxRow;
 
-    while (line < endLine) {
+    while (row < endRow) {
       /// Tokenize from first non-empty line
-      line = this.manager.skipEmptyLines(line);
-      this.manager.currentLine = line;
-      if (line >= endLine) {
+      row = this.manager.skipEmptyRows(row);
+      this.manager.currentRow = row;
+      if (row >= endRow) {
         break;
       }
 
       /// Do not tokenize nested blocks
-      if (this.manager.expandIndentMap[line] < this.manager.blockIndent) {
+      if (this.manager.expandIndentMap[row] < this.manager.blockIndent) {
         break;
       }
 
       for (let i = 0; i < length; ++i) {
-        const result = this.blockRules[i].process(this.manager, line);
+        const result = this.blockRules[i].process(this.manager);
         if (result) {
           /// One line can only match one rule per time.
           break;
@@ -60,20 +59,21 @@ class Parser {
 
       /// In `rule.process`, might increase `core.line`, so synchronize
       /// it here.
-      line = this.manager.currentLine;
+      row = this.manager.currentRow;
 
-      if (line < endLine && this.manager.isEmpty(line)) {
-        ++line;
-        this.manager.currentLine = line;
+      if (row < endRow && this.manager.isEmpty(row)) {
+        ++row;
+        this.manager.currentRow = row;
       }
     }
+    return this;
   }
 }
 
 const p = new Parser();
 const data = fs.readFileSync("/Users/gaoge/Development/markdown/test/test1.md");
-p.process(data.toString());
+p.initialize(data.toString()).tokenize();
 
-p.manager.tokens.forEach((token: Token) => {
+p.manager.tokens.visit(token => {
   console.log(token);
 });

@@ -1,7 +1,7 @@
 import { StateManager } from '../core';
 
 interface Rule {  
-  process(core: StateManager, startLine: number): boolean;
+  process(state: StateManager): boolean;
 };
 
 export { Rule };

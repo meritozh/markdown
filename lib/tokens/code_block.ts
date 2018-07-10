@@ -1,10 +1,10 @@
-import { Token, TokenType } from "./token";
+import { Token, TokenType, T } from "./token";
 
 class CodeBlockToken extends Token {
   content: string;
 
-  constructor(pos: number, content: string) {
-    super(TokenType.CodeBlock, pos);
+  constructor(start: T, lineMap: T, content: string) {
+    super(TokenType.CodeBlock, start, lineMap);
     this.content = content;
   }
 }

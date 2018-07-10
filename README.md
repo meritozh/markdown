@@ -21,3 +21,7 @@ I won't handle some corner case, because I won't write such markdown.
 <block> -> horizontal break -> fence -> heading -> paragraph -> <inline>
 <inline> -> bold -> italic -> delimiter -> image -> reference -> subscript -> superscript -> <end>
 ```
+
+### Note
+
+1. All `pos` in rule, must plus `state.blockIndent` while initializing.

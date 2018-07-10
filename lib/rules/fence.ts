@@ -1,78 +1,84 @@
-import {StateManager} from '../core';
-import {TokenType} from '../tokens';
-import {FenceToken} from '../tokens/fence';
+import { StateManager } from "../core";
+import { FenceToken } from "../tokens";
 
-import {Code} from '../utils';
-import {Rule} from './rule';
+import { Code } from "../utils";
+import { Rule } from "./rule";
 
 /// ```lang
+/// <blabla>
+/// ```
 class Fence implements Rule {
-  process(core: StateManager, startLine: number) {
-    if (core.expandIndentMap[startLine] - core.blockIndent >= 4) {
-      return false;
-    }
+  process(state: StateManager) {
+    const startRow = state.currentRow;
 
-    /// Truely begin position
-    let pos = core.beginMap[startLine] + core.rawIndentMap[startLine];
-    let max = core.endMap[startLine];
+    let pos =
+      state.beginMap[startRow] +
+      state.rawIndentMap[startRow] +
+      state.blockIndent;
+    let max = state.endMap[startRow];
 
-    /// At least 3 length.
+    /// At least 4 length.
     if (pos + 3 > max) {
       return false;
     }
 
-    let code = core.src.charCodeAt(pos);
-    if (code !== Code('`')) {
+    let code = state.codeFor(pos);
+    if (code !== Code("`")) {
       return false;
     }
 
     let mem = pos;
-    pos = core.skipChars(pos, max, code);
-    let length = pos - mem;
+    pos = state.skipChars(pos, max, Code("`"));
+    const length = pos - mem;
 
     if (length < 3) {
       return false;
     }
 
-    let lang = core.src.slice(pos, max);
+    /// Allow trailing whitespace.
+    let lang = state.src.slice(pos, max).trimRight();
 
-    let nextLine = startLine;
+    let nextRow = startRow;
     let haveEndMarker = false;
 
-    let firstPos = mem;
+    let firstLocation = state.getRowAndColumn(mem);
 
     while (true) {
-      ++nextLine;
+      ++nextRow;
 
-      pos = core.beginMap[nextLine] + core.rawIndentMap[nextLine];
+      pos =
+        state.beginMap[nextRow] +
+        state.rawIndentMap[nextRow] +
+        state.blockIndent;
       mem = pos;
-      max = core.endMap[nextLine];
+      max = state.endMap[nextRow];
 
-      if (pos < max && core.expandIndentMap[nextLine] < core.blockIndent) {
+      if (pos < max && state.expandIndentMap[nextRow] < state.blockIndent) {
         /// Non-empty line with negative indent should stop the list:
         /// - ```
         ///  test
         break;
       }
 
-      if (core.src.charCodeAt(pos) !== code) {
+      if (state.codeFor(pos) !== Code("`")) {
         continue;
       }
 
-      if (core.expandIndentMap[nextLine] - core.blockIndent >= 4) {
+      if (state.expandIndentMap[nextRow] - state.blockIndent >= 4) {
         /// Closing fence should be indented less than 4 spaces.
         continue;
       }
 
-      pos = core.skipChars(pos, max, code);
+      pos = state.skipChars(pos, max, Code("`"));
 
       /// Closing code fence must be at least as long as the opening one.
       if (pos - mem < length) {
         continue;
       }
 
-      /// make sure tail has spaces only.
-      pos = core.skipWhitespaces(pos);
+      /// Make sure tail has spaces only.
+      /// Newline is whitespace.
+      pos = state.skipWhitespaces(pos);
 
       if (pos < max) {
         continue;
@@ -91,21 +97,19 @@ class Fence implements Rule {
     /// \b\b```
     ///
     /// Need trim all `\b`s.
-    length = core.expandIndentMap[startLine];
+    const indent = state.rawIndentMap[startRow] + state.blockIndent;
 
-    core.currentLine = nextLine + (haveEndMarker ? 1 : 0);
+    state.currentRow = nextRow + (haveEndMarker ? 1 : 0);
 
-    /// `startLine + 1`, because we do not need ```<lang> here.
+    /// `startLine + 1`, because we do not need ```<lang>.
     /// `nextLine - 1`, because we do not need ```.
-    const content = core.getLines(startLine + 1, nextLine - 1, length);
-    const fenceToken =
-        new FenceToken(TokenType.CodeFence, firstPos, 'code', content);
-    fenceToken.lang = lang;
-    fenceToken.lineMap = [startLine, core.currentLine];
-    core.push(fenceToken);
+    const content = state.getRows(startRow + 1, nextRow - 1, indent);
+    state.addChild(
+      new FenceToken(firstLocation, [startRow, nextRow], lang, content)
+    );
 
     return true;
   }
-};
+}
 
-export {Fence};
+export { Fence };

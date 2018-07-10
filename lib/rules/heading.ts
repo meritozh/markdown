@@ -1,21 +1,20 @@
-import { HeadingToken, InlineToken, TokenType } from "../tokens";
+import { HeadingToken } from "../tokens";
 import { StateManager } from "../core";
-import { IsSpace, Code } from "../utils/string";
-import { Rule } from './rule';
+import { IsSpace, Code } from "../utils";
+import { Rule } from "./rule";
 
 class Heading implements Rule {
-  process(core: StateManager, startLine: number) {
-    const content = core.src;
+  process(state: StateManager) {
+    const startLine = state.currentRow;
 
-    let pos = core.beginMap[startLine] + core.rawIndentMap[startLine];
-    let max = core.endMap[startLine];
+    let pos =
+      state.beginMap[startLine] +
+      state.rawIndentMap[startLine] +
+      state.blockIndent;
+    let max = state.endMap[startLine];
 
-    if (core.expandIndentMap[startLine] - core.blockIndent >= 4) {
-      return false;
-    }
-    
-    let code = content.charCodeAt(pos);
-    if (code !== Code('#')) {
+    let code = state.codeFor(pos);
+    if (code !== Code("#")) {
       return false;
     }
 
@@ -23,9 +22,9 @@ class Heading implements Rule {
     const start = pos;
 
     let level = 0;
-    while(code === Code('#') && level <= 6) {
+    while (code === Code("#") && level <= 6) {
       level++;
-      code = content.charCodeAt(++pos);
+      code = state.codeFor(++pos);
     }
 
     /// After a sequence of `#`, must have one space
@@ -34,40 +33,29 @@ class Heading implements Rule {
     }
 
     /// Cut '   ###    ' from the end of string.
-    max = core.skipWhitespacesBack(max, pos);
-    let tmp = core.skipCharsBack(max, pos, Code('#'));
+    max = state.skipWhitespacesBack(max, pos);
+    let tmp = state.skipCharsBack(max, pos, Code("#"));
     /// Closing sequence of `#` must have a prefix space.
-    if (tmp > pos && IsSpace(core.src.charCodeAt(tmp - 1))) {
+    if (tmp > pos && IsSpace(state.codeFor(tmp - 1))) {
       max = tmp;
     }
 
-    core.currentLine = startLine + 1;
+    state.currentRow = startLine + 1;
 
-    const hTag = 'h' + String(level);
+    const hTag = "h" + String(level);
+    const content = state.src.slice(pos, max);
 
-    /// heading open
-    const headingOpen = new HeadingToken(TokenType.HeadingOpen, start, hTag);
-    headingOpen.lineMap = [startLine, core.currentLine];
-    core.push(headingOpen);
-
-    /// all remaining characters in current line are text
-    const text = content.slice(pos, max).trim();
-    /// `pos + 1`, because current `pos` is a space, but
-    /// line text start from next position.
-    const Text = new InlineToken(pos + 1, text);
-    Text.lineMap = [startLine, core.currentLine];
-    core.push(Text); 
-
-    /// heading close
-    /// Treat cutted line end position as heading ending.
-    const headingClose = new HeadingToken(TokenType.HeadingClose, max, hTag);
-    headingClose.lineMap = [startLine, core.currentLine];
-    core.push(headingClose);
+    state.addChild(
+      new HeadingToken(
+        [startLine, start],
+        [startLine, state.currentRow],
+        hTag,
+        content
+      )
+    );
 
     return true;
   }
-};
+}
 
-export {
-  Heading,
-};
+export { Heading };

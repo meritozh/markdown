@@ -1,43 +1,50 @@
-import {StateManager} from '../core';
-import {CodeBlockToken} from '../tokens/code_block';
+import { StateManager } from "../core";
+import { CodeBlockToken } from "../tokens";
 
-import {Rule} from './rule';
+import { Rule } from "./rule";
 
 class CodeBlock implements Rule {
-  process(core: StateManager, startLine: number) {
-    if (core.expandIndentMap[startLine] - core.blockIndent < 4) {
+  process(state: StateManager) {
+    const startRow = state.currentRow;
+    const expandIndent = state.expandIndentMap[startRow] - state.blockIndent;
+
+    if (expandIndent < 4) {
       return false;
     }
 
-    let nextLine = startLine + 1;
+    let nextRow = startRow + 1;
     /// Store last non-empty line number.
-    let lastLine = startLine;
+    let lastRow = startRow;
 
-    while (nextLine < core.maxLine) {
-      if (core.isEmpty(nextLine)) {
-        ++nextLine;
+    while (nextRow < state.maxRow) {
+      if (state.isEmpty(nextRow)) {
+        ++nextRow;
         continue;
       }
 
-      if (core.expandIndentMap[nextLine] - core.blockIndent >= 4) {
-        ++nextLine;
-        lastLine = nextLine;
+      if (state.expandIndentMap[nextRow] - state.blockIndent >= 4) {
+        ++nextRow;
+        lastRow = nextRow;
         continue;
       }
 
       break;
     }
 
-    core.currentLine = nextLine;
+    state.currentRow = nextRow;
 
-    const content = core.getLines(startLine, lastLine, core.blockIndent + 4);
-    const codeBlockToken =
-        new CodeBlockToken(core.beginMap[startLine], content);
-    codeBlockToken.lineMap = [startLine, lastLine];
-    core.push(codeBlockToken);
+    const content = state.getRows(startRow, lastRow, state.blockIndent + 4);
+    const column = state.rawIndentMap[startRow];
+    state.addChild(
+      new CodeBlockToken(
+        [startRow, column],
+        [startRow, lastRow],
+        content
+      )
+    );
 
     return true;
   }
-};
+}
 
-export {CodeBlock};
+export { CodeBlock };

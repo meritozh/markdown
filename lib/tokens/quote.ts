@@ -1,22 +1,18 @@
-import { Token, TokenType } from "./token";
+import { Token, TokenType, T } from "./token";
+
+interface LevelContentMap {
+  level: number;
+  content: string | undefined;
+}
 
 class QuoteToken extends Token {
-  tag: string;
-  level: number;
-  content?: string;
+  tag: string = "blockquote";
+  content: LevelContentMap[];
 
-  constructor(
-    type: TokenType,
-    pos: number,
-    tag: string,
-    level: number,
-    content?: string
-  ) {
-    super(type, pos);
-    this.tag = tag;
-    this.level = level;
+  constructor(start: T, lineMap: T, content: LevelContentMap[]) {
+    super(TokenType.Quote, start, lineMap);
     this.content = content;
   }
 }
 
-export { QuoteToken };
+export { QuoteToken, LevelContentMap };

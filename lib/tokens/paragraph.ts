@@ -1,12 +1,12 @@
-import { Token, TokenType } from "./token";
+import { Token, TokenType, T } from "./token";
 
 class ParagraphToken extends Token {
-  tag: string;
+  tag: string = 'p';
+  content: string;
 
-  constructor(type: TokenType, pos: number, tag: string) {
-    super(type, pos);
-    this.tag = tag;
-    this.inline = false;
+  constructor(start: T, lineMap: T, content: string) {
+    super(TokenType.Paragraph, start, lineMap);
+    this.content = content;
   }
 }
 

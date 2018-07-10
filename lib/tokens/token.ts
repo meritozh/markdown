@@ -7,13 +7,8 @@ enum TokenType {
   CodeFence = "code_fence",
   HorizontalBreak = "horizontal_break",
   Quote = "quote",
-
-  HeadingOpen = "heading_open",
-  HeadingClose = "heading_close",
-
-  ParagraphOpen = "paragraph_open",
-  ParagraphClose = "paragraph_close",
-
+  Heading = "heading",
+  Paragraph = "paragraph",
   Inline = "inline"
 }
 
@@ -32,13 +27,13 @@ class Token extends Node {
    */
   lineMap: T;
 
-  constructor(type: TokenType, row: number, column: number, lineMap: T) {
+  constructor(type: TokenType, start: T, lineMap: T) {
     super();
     this.tokenType = type;
-    this.row = row;
-    this.column = column;
+    this.row = start["0"];
+    this.column = start["1"];
     this.lineMap = lineMap;
   }
 }
 
-export { TokenType, Token };
+export { TokenType, Token, T};
