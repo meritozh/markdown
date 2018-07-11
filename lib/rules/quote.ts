@@ -28,7 +28,7 @@ class Quote implements Rule {
     let next = 0;
     let content = "";
 
-    let startLocation: [number, number] | undefined = undefined;
+    let location = state.getLocation(pos);
 
     while (!state.isEmpty(nextRow)) {
       level = 0;
@@ -41,9 +41,6 @@ class Quote implements Rule {
         code === Code(">") &&
         (IsSpace(next) || IsNewLine(next) || !next) /// next === NaN
       ) {
-        if (!startLocation) {
-          startLocation = [nextRow, pos];
-        }
         ++level;
         pos = pos + 2;
         if (IsNewLine(next) || !next) {
@@ -53,15 +50,21 @@ class Quote implements Rule {
         next = state.codeFor(pos + 1);
       }
       let indent = pos - state.beginMap[nextRow];
-      content = state.getRow(nextRow, indent);
-      rowContent[nextRow - startRow] = { level: level, content: content };
+      content = state.getRow(nextRow, indent) + '\n';
+      /// Combination.
+      let lastContent = rowContent[rowContent.length - 1];
+      if (lastContent && lastContent.level === level) {
+        lastContent.content += content;
+      } else {
+        rowContent.push({ level: level, content: content });
+      }
       ++nextRow;
     }
 
     state.currentRow = nextRow;
 
     const quoteToken = new QuoteToken(
-      startLocation!,
+      location,
       [startRow, nextRow],
       rowContent
     );

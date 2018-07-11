@@ -8,7 +8,7 @@ class Paragraph implements Rule {
     let nextRow = startRow + 1;
     let endRow = state.maxRow;
 
-    for (; nextRow < endRow && !state.isEmpty(nextRow); ++nextRow) {
+    for (; nextRow <= endRow && !state.isEmpty(nextRow); ++nextRow) {
       /// This would be a code block normally, but after paragraph
       /// it's considered a lazy continuation regardless of what's there.
       if (state.expandIndentMap[nextRow] - state.blockIndent >= 4) {
@@ -20,7 +20,7 @@ class Paragraph implements Rule {
 
     const pos = state.beginMap[startRow] + state.blockIndent;
     const content = state.getRows(startRow, nextRow);
-    const location: [number, number] = [startRow, pos];
+    const location = state.getLocation(pos);
 
     state.addChild(
       new ParagraphToken(location, [startRow, state.currentRow], content)

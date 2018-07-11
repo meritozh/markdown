@@ -12,7 +12,7 @@ enum TokenType {
   Inline = "inline"
 }
 
-type T = [number, number];
+type Location = [number, number];
 
 class Token extends Node {
   tokenType: TokenType;
@@ -25,9 +25,9 @@ class Token extends Node {
    * Line map, if same number means one line.
    * Ditermine how big this token is.
    */
-  lineMap: T;
+  lineMap: Location;
 
-  constructor(type: TokenType, start: T, lineMap: T) {
+  constructor(type: TokenType, start: Location, lineMap: Location) {
     super();
     this.tokenType = type;
     this.row = start["0"];
@@ -36,4 +36,4 @@ class Token extends Node {
   }
 }
 
-export { TokenType, Token, T};
+export { TokenType, Token, Location };

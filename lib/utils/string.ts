@@ -183,6 +183,10 @@ const Code = (char: string) => {
   return char.charCodeAt(0);
 };
 
+const Repeat = (str: string, num: number) => {
+  return new Array<string>(num + 1).join(str);
+}
+
 export {
   IsLine,
   IsSpace,
@@ -195,5 +199,6 @@ export {
   IsLineEnding,
   IsBlankLine,
   IsIndent,
-  IsNewLine
+  IsNewLine,
+  Repeat
 };

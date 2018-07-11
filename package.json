@@ -4,7 +4,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc -p .",
-    "test": "yarn build && node dist/test/entry.js"
+    "test": "node dist/test/entry.js",
+    "retest": "yarn build && yarn test"
   },
   "license": "MIT",
   "devDependencies": {

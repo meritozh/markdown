@@ -1,9 +1,9 @@
-import { Token, TokenType, T } from "./token";
+import { Token, TokenType, Location } from "./token";
 
 class HorizontalBreakToken extends Token {
   tag: string = "hr";
 
-  constructor(start: T, lineMap: T) {
+  constructor(start: Location, lineMap: Location) {
     super(TokenType.HorizontalBreak, start, lineMap);
   }
 }

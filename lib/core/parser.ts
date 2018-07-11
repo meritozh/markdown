@@ -1,9 +1,7 @@
-import fs from "fs";
-
 import {
   Heading,
   Paragraph,
-  CodeBlock,
+  Block,
   Quote,
   HorizonalBreak,
   Fence
@@ -15,7 +13,7 @@ class Parser {
   manager = new StateManager();
   /// Order of rules initialize is important
   blockRules = [
-    new CodeBlock(), /// Must be first.
+    new Block(), /// Must be first.
     new Quote(),
     new Fence(),
     new Heading(),
@@ -36,11 +34,11 @@ class Parser {
     let row = this.manager.currentRow;
     let endRow = this.manager.maxRow;
 
-    while (row < endRow) {
+    while (row <= endRow) {
       /// Tokenize from first non-empty line
       row = this.manager.skipEmptyRows(row);
       this.manager.currentRow = row;
-      if (row >= endRow) {
+      if (row > endRow) {
         break;
       }
 
@@ -61,7 +59,7 @@ class Parser {
       /// it here.
       row = this.manager.currentRow;
 
-      if (row < endRow && this.manager.isEmpty(row)) {
+      if (row <= endRow && this.manager.isEmpty(row)) {
         ++row;
         this.manager.currentRow = row;
       }
@@ -70,10 +68,4 @@ class Parser {
   }
 }
 
-const p = new Parser();
-const data = fs.readFileSync("/Users/gaoge/Development/markdown/test/test1.md");
-p.initialize(data.toString()).tokenize();
-
-p.manager.tokens.visit(token => {
-  console.log(token);
-});
+export { Parser };

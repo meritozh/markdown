@@ -4,9 +4,20 @@ import {
   IsSpace,
   IsIndent,
   IsTab,
-  IsWhitespace
+  IsWhitespace,
+  Repeat
 } from "./string";
 
 import { Node, Tree } from "./tree";
 
-export { Node, Tree, Code, IsNewLine, IsSpace, IsIndent, IsTab, IsWhitespace };
+export {
+  Node,
+  Tree,
+  Code,
+  IsNewLine,
+  IsSpace,
+  IsIndent,
+  IsTab,
+  IsWhitespace,
+  Repeat
+};

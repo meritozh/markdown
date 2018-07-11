@@ -1,4 +1,4 @@
-import { Token } from "../tokens/token";
+import { Token, Location } from "../tokens";
 import { IsIndent, IsNewLine, IsTab, Tree, IsWhitespace } from "../utils";
 
 /// Need move some logics to state machine, to keep `Core` only
@@ -127,30 +127,43 @@ class StateManager {
     }
 
     this.maxRow = this.beginMap.length - 1;
+
+    /// Fake entry. Useful when no new empty line as EOF.
+    this.beginMap.push(pos);
+    this.endMap.push(pos);
+    this.rawIndentMap.push(0);
+    this.expandIndentMap.push(0);
+    this.recordTabExpandGuideMap.push(0);
   }
 
   codeFor(pos: number) {
     return this.src.charCodeAt(pos);
   }
 
-  getPos(location: [number, number]) {
+  getPosition(location: Location) {
     const row = location["0"];
     const column = location["1"];
     return this.beginMap[row] + column;
   }
 
-  getRowAndColumn(pos: number): [number, number] {
+  getLocation(pos: number): Location {
     let column = 0;
     let row = 1;
+    const start = pos + 1;
     for (; row < this.beginMap.length; ++row) {
-      if (this.beginMap[row] < pos) {
-        continue;
-      } else if (this.beginMap[row] === pos) {
-        break;
-      } else {
-        column = pos - this.beginMap[row];
+      if (this.beginMap[row] < start) {
+        if (this.beginMap[row + 1] > start) {
+          break;
+        } else {
+          continue;
+        }
+      } else if (this.beginMap[row] === start) {
         break;
       }
+    }
+    column = start - this.beginMap[row];
+    if (column < 1) {
+      console.log("something wrong");
     }
     return [row, column];
   }
@@ -233,7 +246,8 @@ class StateManager {
   getRow(row: number, indent?: number) {
     let start = this.beginMap[row] + (indent || 0);
     let end = this.endMap[row];
-    return this.src.slice(start, end);
+    /// No last `\n'.
+    return this.src.slice(start, end - 1);
   }
 
   /**
@@ -314,14 +328,14 @@ class StateManager {
       return queue.join("");
     }
 
-    return this.src.slice(this.beginMap[start], this.endMap[end]);
+    return this.src.slice(this.beginMap[start], this.endMap[end] - 1);
   }
 
   addChild(token: Token, to?: Token) {
     if (to) {
       this.tokens.addChild(token, to);
     } else {
-      this.tokens.addChild(token, this.tokens.current)
+      this.tokens.addChild(token, this.tokens.current);
     }
   }
 }

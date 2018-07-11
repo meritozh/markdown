@@ -1,18 +1,18 @@
-import Markdown from '../lib';
+import { Parser } from "../lib/core/parser";
+import fs from "fs";
+import { CodeGenerator } from "../lib/renderer/generator";
 
-const md = new Markdown();
+const p = new Parser();
+const data = fs.readFileSync("/Users/gaoge/Development/markdown/test/test1.md");
+p.initialize(data.toString()).tokenize();
 
-md.tokenize('####     h1 test lalala   ');
+const g = new CodeGenerator();
+const r = g.initailize(p.manager.tokens).generate();
 
-const tokens = md.state.tokenizer.tokens;
-if (tokens) {
-  tokens.forEach(token => {
-    console.log(token);
-  });
-}
-
-// const state = md.state;
-// const content = '  asdfg   ';
-// state.process(content);
-// console.log(`skip spaces: ${state.skipSpaces(0)}`);
-// console.log(`skip spaces back: ${state.skipSpacesBack(content.length, 0)}`);
+fs.writeFile(
+  "/Users/gaoge/Development/markdown/test/result.html",
+  r,
+  exception => {
+    console.log(exception);
+  }
+);

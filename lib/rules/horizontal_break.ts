@@ -18,13 +18,10 @@ class HorizonalBreak implements Rule {
     let level = 0;
     let code = state.src.charCodeAt(pos);
 
-    let location: [number, number] | undefined = undefined;
+    const location = state.getLocation(pos);
 
     while (code === Code("-")) {
       ++level;
-      if (!location) {
-        location = [startRow, pos];
-      }
       code = state.src.charCodeAt(++pos);
     }
 
@@ -36,7 +33,7 @@ class HorizonalBreak implements Rule {
     state.currentRow = startRow + 1;
 
     state.addChild(
-      new HorizontalBreakToken(location!, [startRow, state.currentRow])
+      new HorizontalBreakToken(location, [startRow, state.currentRow])
     );
 
     return true;

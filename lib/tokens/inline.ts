@@ -1,11 +1,11 @@
-import { Token, TokenType, T } from "./token";
+import { Token, TokenType, Location } from "./token";
 
 /// InlineToken need be tokenized later
 class InlineToken extends Token {
   content: string;
   children: Token[] = [];
 
-  constructor(start: T, lineMap: T, content: string) {
+  constructor(start: Location, lineMap: Location, content: string) {
     super(TokenType.Inline, start, lineMap);
     this.content = content;
   }

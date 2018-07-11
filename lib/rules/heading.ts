@@ -43,11 +43,13 @@ class Heading implements Rule {
     state.currentRow = startLine + 1;
 
     const hTag = "h" + String(level);
-    const content = state.src.slice(pos, max);
+    /// Current `pos` point to required space, so plus 1.
+    const content = state.src.slice(pos + 1, max);
+    const location = state.getLocation(start);
 
     state.addChild(
       new HeadingToken(
-        [startLine, start],
+        location,
         [startLine, state.currentRow],
         hTag,
         content

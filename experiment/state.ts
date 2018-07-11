@@ -138,15 +138,6 @@ class StateMachie {
     this.pending = true;
   }
 
-  private isInitized() {
-    return this.state === State.Start 
-           && this.pos === 0 && this.pending === false;
-  }
-
-  private isEnd() {
-    return this.state === State.End;
-  }
-
   private charCodeAt(pos: number) {
     return this.content!.charCodeAt(pos);
   }

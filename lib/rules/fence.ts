@@ -27,6 +27,8 @@ class Fence implements Rule {
       return false;
     }
 
+    const location = state.getLocation(pos);
+
     let mem = pos;
     pos = state.skipChars(pos, max, Code("`"));
     const length = pos - mem;
@@ -40,8 +42,6 @@ class Fence implements Rule {
 
     let nextRow = startRow;
     let haveEndMarker = false;
-
-    let firstLocation = state.getRowAndColumn(mem);
 
     while (true) {
       ++nextRow;
@@ -102,10 +102,9 @@ class Fence implements Rule {
     state.currentRow = nextRow + (haveEndMarker ? 1 : 0);
 
     /// `startLine + 1`, because we do not need ```<lang>.
-    /// `nextLine - 1`, because we do not need ```.
-    const content = state.getRows(startRow + 1, nextRow - 1, indent);
+    const content = state.getRows(startRow + 1, nextRow, indent);
     state.addChild(
-      new FenceToken(firstLocation, [startRow, nextRow], lang, content)
+      new FenceToken(location, [startRow, state.currentRow], lang, content)
     );
 
     return true;
