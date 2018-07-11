@@ -1,8 +1,8 @@
-import { StateManager } from "../core";
-import { FenceToken } from "../tokens";
+import { StateManager } from "../../core";
+import { FenceToken } from "../../tokens";
 
-import { Code } from "../utils";
-import { Rule } from "./rule";
+import { Code } from "../../utils";
+import { Rule } from "../rule";
 
 /// ```lang
 /// <blabla>

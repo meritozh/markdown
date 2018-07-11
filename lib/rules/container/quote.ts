@@ -1,8 +1,8 @@
-import { Rule } from "./rule";
-import { StateManager } from "../core";
+import { Rule } from "../rule";
+import { StateManager } from "../../core";
 
-import { Code, IsSpace, IsNewLine } from "../utils";
-import { QuoteToken, LevelContentMap } from "../tokens";
+import { Code, IsSpace, IsNewLine } from "../../utils";
+import { QuoteToken, LevelContentMap } from "../../tokens";
 
 /// All space is not optional.
 class Quote implements Rule {

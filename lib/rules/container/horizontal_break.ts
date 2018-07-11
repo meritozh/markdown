@@ -1,8 +1,8 @@
-import { StateManager } from "../core";
-import { HorizontalBreakToken } from "../tokens";
-import { Code, IsWhitespace } from "../utils";
+import { StateManager } from "../../core";
+import { HorizontalBreakToken } from "../../tokens";
+import { Code, IsWhitespace } from "../../utils";
 
-import { Rule } from "./rule";
+import { Rule } from "../rule";
 
 class HorizonalBreak implements Rule {
   process(state: StateManager) {

@@ -1,7 +1,7 @@
-import { StateManager } from "../core";
-import { BlockToken } from "../tokens";
+import { StateManager } from "../../core";
+import { BlockToken } from "../../tokens";
 
-import { Rule } from "./rule";
+import { Rule } from "../rule";
 
 class Block implements Rule {
   process(state: StateManager) {

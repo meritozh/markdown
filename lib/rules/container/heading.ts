@@ -1,7 +1,7 @@
-import { HeadingToken } from "../tokens";
-import { StateManager } from "../core";
-import { IsSpace, Code } from "../utils";
-import { Rule } from "./rule";
+import { HeadingToken } from "../../tokens";
+import { StateManager } from "../../core";
+import { IsSpace, Code } from "../../utils";
+import { Rule } from "../rule";
 
 class Heading implements Rule {
   process(state: StateManager) {

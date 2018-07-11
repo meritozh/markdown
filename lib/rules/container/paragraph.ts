@@ -1,6 +1,6 @@
-import { Rule } from "./rule";
-import { StateManager } from "../core";
-import { ParagraphToken } from "../tokens";
+import { Rule } from "../rule";
+import { StateManager } from "../../core";
+import { ParagraphToken } from "../../tokens";
 
 class Paragraph implements Rule {
   process(state: StateManager) {
