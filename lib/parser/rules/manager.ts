@@ -7,7 +7,7 @@ import { HorizonalBreak } from "./container/horizontal_break";
 import { Heading } from "./container/heading";
 import { Quote } from "./container/quote";
 import { Paragraph } from "./container/paragraph";
-import { Success } from "../../utils";
+import { Success, R, Failure } from "../../utils";
 
 class RuleManager {
   matcher = new RuleMatcher();
@@ -16,10 +16,6 @@ class RuleManager {
 
   get length() {
     return this.rules.length;
-  }
-
-  restore() {
-    this.current = 0;
   }
 
   initialize() {
@@ -46,7 +42,22 @@ class RuleManager {
     }
   }
 
-  process(state: StateManager, from?: number) {
+  process(state: StateManager) {
+    let Ret: R | undefined = undefined;
+    /// Paragraph rule always success. No infinite loop.
+    while (!Ret || Ret instanceof Failure) {
+      Ret = this.handle(state);
+      /// Safety, JS allow access undefined property.
+      const r = (Ret as Success).nextRule || (Ret as Failure).fallbackRule;
+      if (r) {
+        /// Just try to do more processing. So needn't update `Ret`.
+        this.handle(state, this.match(r));
+      }
+    }
+    this.restore();
+  }
+
+  private handle(state: StateManager, from?: number) {
     if (!this.length) {
       throw Error('Must add or insert rules before processing.');
     }
@@ -60,7 +71,11 @@ class RuleManager {
     return this.rules[this.current].process(state);
   }
 
-  match(t: string) {
+  private restore() {
+    this.current = 0;
+  }
+
+  private match(t: string) {
     const l = this.length;
     for(let i = 0; i < l; ++i) {
       if (this.rules[i].isa(t)) {

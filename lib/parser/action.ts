@@ -1,6 +1,5 @@
 import { StateManager } from "../core";
 import { RuleManager } from "./rules/manager";
-import { Success, Failure, R } from "../utils";
 
 class ParserAction {
   SM = new StateManager();
@@ -29,18 +28,7 @@ class ParserAction {
         break;
       }
       
-      let Ret: R | undefined = undefined;
-      /// Paragraph rule always success. No infinite loop.
-      while (!Ret || Ret instanceof Failure) {
-        Ret = this.RM.process(this.SM);
-        /// Safety, JS allow access undefined property.
-        const r = (Ret as Success).nextRule || (Ret as Failure).fallbackRule;
-        if (r) {
-          /// Just try to do more processing. So needn't update `Ret`.
-          this.RM.process(this.SM, this.RM.match(r));
-        }
-      }
-      this.RM.restore();
+      this.RM.process(this.SM);
 
       /// In `rule.process`, might increase `core.line`, so synchronize
       /// it here.
