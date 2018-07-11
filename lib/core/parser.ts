@@ -12,7 +12,7 @@ import { StateManager } from ".";
 class Parser {
   manager = new StateManager();
   /// Order of rules initialize is important
-  blockRules = [
+  containerRules = [
     new Block(), /// Must be first.
     new Quote(),
     new Fence(),
@@ -29,7 +29,7 @@ class Parser {
   }
 
   tokenize() {
-    const length = this.blockRules.length;
+    const length = this.containerRules.length;
 
     let row = this.manager.currentRow;
     let endRow = this.manager.maxRow;
@@ -48,7 +48,7 @@ class Parser {
       }
 
       for (let i = 0; i < length; ++i) {
-        const result = this.blockRules[i].process(this.manager);
+        const result = this.containerRules[i].process(this.manager);
         if (result) {
           /// One line can only match one rule per time.
           break;
