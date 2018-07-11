@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/meritozh/markdown.svg?branch=master)](https://travis-ci.org/meritozh/markdown)
+
 A markdown parser written in pure TypeScript, inspired by markdown-it heavily.
 
 Not 100% compatible with commonmark spec, because I do not need some features.
