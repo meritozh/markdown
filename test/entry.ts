@@ -7,7 +7,7 @@ const data = fs.readFileSync("/Users/gaoge/Development/markdown/test/test1.md");
 p.initialize(data.toString()).tokenize();
 
 const g = new CodeGenerator();
-const r = g.initailize(p.manager.tokens).generate();
+const r = g.initailize(p.manager.AST).generate();
 
 fs.writeFile(
   "/Users/gaoge/Development/markdown/test/result.html",

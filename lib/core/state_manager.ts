@@ -66,7 +66,7 @@ class StateManager {
    */
   blockIndent = 0;
 
-  tokens = new Tree();
+  AST = new Tree();
 
   /// Handle file as one big string.
   /// Will calculate [line -> pos] map, number of line, etc.
@@ -333,9 +333,9 @@ class StateManager {
 
   addChild(token: Token, to?: Token) {
     if (to) {
-      this.tokens.addChild(token, to);
+      this.AST.addChild(token, to);
     } else {
-      this.tokens.addChild(token, this.tokens.current);
+      this.AST.addChild(token, this.AST.current);
     }
   }
 }
