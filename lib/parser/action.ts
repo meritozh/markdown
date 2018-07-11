@@ -1,67 +1,54 @@
-import {
-  Heading,
-  Paragraph,
-  Block,
-  Quote,
-  HorizonalBreak,
-  Fence
-} from "./rules";
-
 import { StateManager } from "../core";
+import { RuleManager } from "./rules/manager";
+import { Success, Failure, R } from "../utils";
 
 class ParserAction {
-  manager = new StateManager();
-  /// Order of rules initialize is important
-  containerRules = [
-    new Block(), /// Must be first.
-    new Quote(),
-    new Fence(),
-    new Heading(),
-    new HorizonalBreak(),
-    new Paragraph()
-  ];
-
-  inlineRules = [];
+  SM = new StateManager();
+  RM = new RuleManager();
 
   initialize(src: string) {
-    this.manager.initialize(src);
+    this.SM.initialize(src);
+    this.RM.initialize();
     return this;
   }
 
-  tokenize() {
-    const length = this.containerRules.length;
-
-    let row = this.manager.currentRow;
-    let endRow = this.manager.maxRow;
+  process() {
+    let row = this.SM.currentRow;
+    let endRow = this.SM.maxRow;
 
     while (row <= endRow) {
       /// Tokenize from first non-empty line
-      row = this.manager.skipEmptyRows(row);
-      this.manager.currentRow = row;
+      row = this.SM.skipEmptyRows(row);
+      this.SM.currentRow = row;
       if (row > endRow) {
         break;
       }
 
       /// Do not tokenize nested blocks
-      if (this.manager.expandIndentMap[row] < this.manager.blockIndent) {
+      if (this.SM.expandIndentMap[row] < this.SM.blockIndent) {
         break;
       }
-
-      for (let i = 0; i < length; ++i) {
-        const result = this.containerRules[i].process(this.manager);
-        if (result) {
-          /// One line can only match one rule per time.
-          break;
+      
+      let Ret: R | undefined = undefined;
+      /// Paragraph rule always success. No infinite loop.
+      while (!Ret || Ret instanceof Failure) {
+        Ret = this.RM.process(this.SM);
+        /// Safety, JS allow access undefined property.
+        const r = (Ret as Success).nextRule || (Ret as Failure).fallbackRule;
+        if (r) {
+          /// Just try to do more processing. So needn't update `Ret`.
+          this.RM.process(this.SM, this.RM.match(r));
         }
       }
+      this.RM.restore();
 
       /// In `rule.process`, might increase `core.line`, so synchronize
       /// it here.
-      row = this.manager.currentRow;
+      row = this.SM.currentRow;
 
-      if (row <= endRow && this.manager.isEmpty(row)) {
+      if (row <= endRow && this.SM.isEmpty(row)) {
         ++row;
-        this.manager.currentRow = row;
+        this.SM.currentRow = row;
       }
     }
     return this;

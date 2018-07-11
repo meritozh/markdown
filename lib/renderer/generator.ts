@@ -6,7 +6,7 @@ import {
   HorizontalBreakToken,
   ParagraphToken,
   QuoteToken
-} from "../tokens";
+} from "../parser/tokens";
 import { CSS } from "./css";
 
 class CodeGenerator {

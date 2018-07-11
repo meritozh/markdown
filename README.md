@@ -8,6 +8,26 @@ Want a easy maintain markdown parser so I create this. Designed for my very pers
 
 I won't handle some corner case, because I won't write such markdown.
 
+### Architecture
+
+```
+      String
+        |
+        v
+     Parser() <--- State
+        |
+        |
+       AST
+        |
+        v
+    Renderer()
+        |
+        v
+       HTML
+```
+
+In `Parser`, it has two `RuleManager`, container or inline. After `Rule().process(state)`, it will return `Success` or `Failure`. If the result contains a rule, `Parser` will process from the rule again. The output of `Parser` is `AST`. Using depth-first searching algorithm, `Renderer` render the result, default is HTML.
+
 ### TODO
 
 1. All line number should start from 1, add a placeholder for index 0.

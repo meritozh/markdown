@@ -1,9 +1,7 @@
-import { Rule } from "../rules";
-
 class Success {
-  nextRule: Rule | undefined;
+  nextRule?: string;
 
-  constructor(nextRule?: Rule) {
+  constructor(nextRule?: string) {
     if (nextRule) {
       this.nextRule = nextRule;
     }
@@ -11,9 +9,9 @@ class Success {
 }
 
 class Failure {
-  fallbackRule: Rule | undefined;
+  fallbackRule?: string;
 
-  constructor(fallbackRule?: Rule) {
+  constructor(fallbackRule?: string) {
     if (fallbackRule) {
       this.fallbackRule = fallbackRule;
     }
