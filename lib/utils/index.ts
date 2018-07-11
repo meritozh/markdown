@@ -10,6 +10,8 @@ import {
 
 import { Node, Tree } from "./tree";
 
+import { Success, Failure, R } from "./result";
+
 export {
   Node,
   Tree,
@@ -19,5 +21,8 @@ export {
   IsIndent,
   IsTab,
   IsWhitespace,
-  Repeat
+  Repeat,
+  Success,
+  Failure,
+  R
 };

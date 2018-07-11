@@ -5,11 +5,11 @@ import {
   Quote,
   HorizonalBreak,
   Fence
-} from "../rules";
+} from "./rules";
 
-import { StateManager } from ".";
+import { StateManager } from "../core";
 
-class Parser {
+class ParserAction {
   manager = new StateManager();
   /// Order of rules initialize is important
   containerRules = [
@@ -68,4 +68,4 @@ class Parser {
   }
 }
 
-export { Parser };
+export { ParserAction };

@@ -1,8 +1,8 @@
-import { Parser } from "../lib/core/parser";
+import { ParserAction } from "../lib/parser";
 import fs from "fs";
 import { CodeGenerator } from "../lib/renderer/generator";
 
-const p = new Parser();
+const p = new ParserAction();
 const data = fs.readFileSync("/Users/gaoge/Development/markdown/test/test1.md");
 p.initialize(data.toString()).tokenize();
 

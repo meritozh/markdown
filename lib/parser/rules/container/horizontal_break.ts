@@ -1,15 +1,19 @@
-import { StateManager } from "../../core";
+import { StateManager } from "../../../core";
 import { HorizontalBreakToken } from "../../tokens";
-import { Code, IsWhitespace } from "../../utils";
+import { Code, IsWhitespace, Failure, Success } from "../../../utils";
 
 import { Rule } from "../rule";
 
 class HorizonalBreak implements Rule {
+  isa(t: string) {
+    return t.toLowerCase() === "horizonal_break";
+  }
+
   process(state: StateManager) {
     const startRow = state.currentRow;
     /// If it's indented more than 3 spaces, it should be a code block
     if (state.expandIndentMap[startRow] - state.blockIndent >= 4) {
-      return false;
+      return new Failure();
     }
 
     /// This is important
@@ -27,7 +31,7 @@ class HorizonalBreak implements Rule {
 
     /// At least three -, and after all -, must whitespace.
     if (level < 3 || !IsWhitespace(code)) {
-      return false;
+      return new Failure();
     }
 
     state.currentRow = startRow + 1;
@@ -36,7 +40,7 @@ class HorizonalBreak implements Rule {
       new HorizontalBreakToken(location, [startRow, state.currentRow])
     );
 
-    return true;
+    return new Success();
   }
 }
 

@@ -1,4 +1,4 @@
-import { Node } from "../utils";
+import { Node } from "../../utils";
 
 /// If token need future processing, we need open close
 /// two type token, otherwise self-closing.

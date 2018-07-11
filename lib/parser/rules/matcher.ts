@@ -1,0 +1,5 @@
+class RuleMatcher {
+  
+}
+
+export { RuleMatcher }

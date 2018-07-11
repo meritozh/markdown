@@ -1,11 +1,15 @@
 import { Rule } from "../rule";
-import { StateManager } from "../../core";
+import { StateManager } from "../../../core";
 
-import { Code, IsSpace, IsNewLine } from "../../utils";
+import { Code, IsSpace, IsNewLine, Failure, Success } from "../../../utils";
 import { QuoteToken, LevelContentMap } from "../../tokens";
 
 /// All space is not optional.
 class Quote implements Rule {
+  isa(t: string) {
+    return t.toLowerCase() === "quote";
+  }
+
   process(state: StateManager) {
     const startRow = state.currentRow;
 
@@ -16,7 +20,7 @@ class Quote implements Rule {
     let code = state.codeFor(pos);
 
     if (code !== Code(">")) {
-      return false;
+      return new Failure();
     }
 
     let nextRow = startRow;
@@ -50,7 +54,7 @@ class Quote implements Rule {
         next = state.codeFor(pos + 1);
       }
       let indent = pos - state.beginMap[nextRow];
-      content = state.getRow(nextRow, indent) + '\n';
+      content = state.getRow(nextRow, indent) + "\n";
       /// Combination.
       let lastContent = rowContent[rowContent.length - 1];
       if (lastContent && lastContent.level === level) {
@@ -70,7 +74,7 @@ class Quote implements Rule {
     );
     state.addChild(quoteToken);
 
-    return true;
+    return new Success();
   }
 }
 

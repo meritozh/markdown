@@ -1,8 +1,13 @@
 import { Rule } from "../rule";
-import { StateManager } from "../../core";
+import { StateManager } from "../../../core";
 import { ParagraphToken } from "../../tokens";
+import { Success } from "../../../utils";
 
 class Paragraph implements Rule {
+  isa(t: string) {
+    return t.toLowerCase() === "paragraph";
+  }
+
   process(state: StateManager) {
     const startRow = state.currentRow;
     let nextRow = startRow + 1;
@@ -26,7 +31,7 @@ class Paragraph implements Rule {
       new ParagraphToken(location, [startRow, state.currentRow], content)
     );
 
-    return true;
+    return new Success();
   }
 }
 

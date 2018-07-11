@@ -1,15 +1,20 @@
-import { StateManager } from "../../core";
+import { StateManager } from "../../../core";
 import { BlockToken } from "../../tokens";
 
 import { Rule } from "../rule";
+import { Failure, Success } from "../../../utils";
 
 class Block implements Rule {
+  isa(t: string) {
+    return t.toLowerCase() === "block";
+  }
+
   process(state: StateManager) {
     const startRow = state.currentRow;
     const expandIndent = state.expandIndentMap[startRow] - state.blockIndent;
 
     if (expandIndent < 4) {
-      return false;
+      return new Failure();
     }
 
     let nextRow = startRow + 1;
@@ -40,7 +45,7 @@ class Block implements Rule {
       new BlockToken([startRow, column], [startRow, lastRow], content)
     );
 
-    return true;
+    return new Success();
   }
 }
 

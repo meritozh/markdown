@@ -1,9 +1,13 @@
 import { HeadingToken } from "../../tokens";
-import { StateManager } from "../../core";
-import { IsSpace, Code } from "../../utils";
+import { StateManager } from "../../../core";
+import { IsSpace, Code, Failure, Success } from "../../../utils";
 import { Rule } from "../rule";
 
 class Heading implements Rule {
+  isa(t: string) {
+    return t.toLowerCase() === "heading";
+  }
+
   process(state: StateManager) {
     const startLine = state.currentRow;
 
@@ -15,7 +19,7 @@ class Heading implements Rule {
 
     let code = state.codeFor(pos);
     if (code !== Code("#")) {
-      return false;
+      return new Failure();
     }
 
     /// `#` starting position
@@ -29,7 +33,7 @@ class Heading implements Rule {
 
     /// After a sequence of `#`, must have one space
     if (level > 6 || (pos < max && !IsSpace(code))) {
-      return false;
+      return new Failure();
     }
 
     /// Cut '   ###    ' from the end of string.
@@ -48,15 +52,10 @@ class Heading implements Rule {
     const location = state.getLocation(start);
 
     state.addChild(
-      new HeadingToken(
-        location,
-        [startLine, state.currentRow],
-        hTag,
-        content
-      )
+      new HeadingToken(location, [startLine, state.currentRow], hTag, content)
     );
 
-    return true;
+    return new Success();
   }
 }
 

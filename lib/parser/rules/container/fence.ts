@@ -1,13 +1,17 @@
-import { StateManager } from "../../core";
+import { StateManager } from "../../../core";
 import { FenceToken } from "../../tokens";
 
-import { Code } from "../../utils";
+import { Code, Failure, Success } from "../../../utils";
 import { Rule } from "../rule";
 
 /// ```lang
 /// <blabla>
 /// ```
 class Fence implements Rule {
+  isa(t: string) {
+    return t.toLowerCase() === "fence";
+  }
+
   process(state: StateManager) {
     const startRow = state.currentRow;
 
@@ -19,12 +23,12 @@ class Fence implements Rule {
 
     /// At least 4 length.
     if (pos + 3 > max) {
-      return false;
+      return new Failure();
     }
 
     let code = state.codeFor(pos);
     if (code !== Code("`")) {
-      return false;
+      return new Failure();
     }
 
     const location = state.getLocation(pos);
@@ -34,7 +38,7 @@ class Fence implements Rule {
     const length = pos - mem;
 
     if (length < 3) {
-      return false;
+      return new Failure();
     }
 
     /// Allow trailing whitespace.
@@ -107,7 +111,7 @@ class Fence implements Rule {
       new FenceToken(location, [startRow, state.currentRow], lang, content)
     );
 
-    return true;
+    return new Success();
   }
 }
 

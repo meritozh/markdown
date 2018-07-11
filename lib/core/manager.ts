@@ -1,4 +1,4 @@
-import { Token, Location } from "../tokens";
+import { Token, Location } from "../parser/tokens";
 import { IsIndent, IsNewLine, IsTab, Tree, IsWhitespace } from "../utils";
 
 /// Need move some logics to state machine, to keep `Core` only
