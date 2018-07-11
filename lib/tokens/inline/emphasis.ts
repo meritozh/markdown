@@ -1,7 +1,7 @@
 import { Token, TokenType, Location } from "../token";
 
 class EmphasisToken extends Token {
-  tag = 'em'
+  tag = "em";
   content: string;
 
   constructor(start: Location, lineMap: Location, content: string) {

@@ -1,7 +1,7 @@
 import { Token, TokenType, Location } from "../token";
 
 class CodeToken extends Token {
-  tag = 'code'
+  tag = "code";
   content: string;
 
   constructor(start: Location, lineMap: Location, content: string) {

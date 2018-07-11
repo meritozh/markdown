@@ -6,7 +6,7 @@ class StrikethroughToken extends Token {
   constructor(start: Location, lineMap: Location, content: string) {
     super(TokenType.Strikethrough, start, lineMap);
     this.content = content;
-  }  
+  }
 }
 
-export {StrikethroughToken}
+export { StrikethroughToken };
