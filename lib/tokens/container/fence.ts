@@ -11,7 +11,7 @@ class FenceToken extends Token {
     lang: string,
     content: string
   ) {
-    super(TokenType.CodeFence, start, lineMap);
+    super(TokenType.Fence, start, lineMap);
     this.lang = lang;
     this.content = content;
   }

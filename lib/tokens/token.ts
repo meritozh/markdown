@@ -3,13 +3,26 @@ import { Node } from "../utils";
 /// If token need future processing, we need open close
 /// two type token, otherwise self-closing.
 enum TokenType {
-  CodeBlock = "code_block",
-  CodeFence = "code_fence",
+  /// Container
+  Block = "block",
+  Fence = "fence",
   HorizontalBreak = "horizontal_break",
   Quote = "quote",
   Heading = "heading",
   Paragraph = "paragraph",
-  Inline = "inline"
+  
+  /// Inline
+  Code = 'code',
+  Emphasis = 'emphasis',
+  Italic = 'italic',
+  Image = 'image',
+  Link = 'image',
+  Superscript = 'superscript',
+  Subscript = 'subscript',
+  Strikethrough = 'strikethrough',
+  Textual = 'textual',
+  RefMark = 'reference_mark',
+  RefDesc = 'reference_desc',
 }
 
 type Location = [number, number];
