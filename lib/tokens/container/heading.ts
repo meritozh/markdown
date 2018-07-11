@@ -1,4 +1,4 @@
-import { Token, TokenType, Location } from "./token";
+import { Token, TokenType, Location } from "../token";
 
 class HeadingToken extends Token {
   tag: string;

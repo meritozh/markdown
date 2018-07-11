@@ -1,4 +1,4 @@
-import { Token, TokenType, Location } from "./token";
+import { Token, TokenType, Location } from "../token";
 
 interface LevelContentMap {
   level: number;

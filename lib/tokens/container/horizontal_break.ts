@@ -1,4 +1,4 @@
-import { Token, TokenType, Location } from "./token";
+import { Token, TokenType, Location } from "../token";
 
 class HorizontalBreakToken extends Token {
   tag: string = "hr";

@@ -1,10 +1,10 @@
 import { Token, Location } from "./token";
-import { HeadingToken } from "./heading";
-import { ParagraphToken } from "./paragraph";
-import { QuoteToken, LevelContentMap } from "./quote";
-import { FenceToken } from "./fence";
-import { BlockToken } from "./block";
-import { HorizontalBreakToken } from "./horizontal_break";
+import { HeadingToken } from "./container/heading";
+import { ParagraphToken } from "./container/paragraph";
+import { QuoteToken, LevelContentMap } from "./container/quote";
+import { FenceToken } from "./container/fence";
+import { BlockToken } from "./container/block";
+import { HorizontalBreakToken } from "./container/horizontal_break";
 
 export {
   Token,
