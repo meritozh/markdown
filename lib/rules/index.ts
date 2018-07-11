@@ -1,7 +1,7 @@
 import { Rule } from "./rule";
 import { Heading } from "./heading";
 import { Paragraph } from "./paragraph";
-import { Block } from "./code_block";
+import { Block } from "./block";
 import { Fence } from "./fence";
 import { HorizonalBreak } from "./horizontal_break";
 import { Quote } from "./quote";
